@@ -1,13 +1,21 @@
 import { screen } from '@testing-library/react';
-import React from 'react';
-import FavoritePokemons from '../pages/FavoritePokemon';
-import renderWithRouter from './renderWithRouter';
+import { FavoritePokemon } from '../pages';
+import renderWithRouter from '../renderWithRouter';
+import pokemonList from '../data';
 
-describe('Tests for page FavoritePokemons', () => {
-  it('the message No favorite pokemon found is displayed on the screen', () => {
-    renderWithRouter(<FavoritePokemons />);
+describe('REQ03 testando o componente <FavoritePokemon.js />', () => {
+  beforeEach(() => {
+    renderWithRouter(<FavoritePokemon pokemonList={ [pokemonList[0]] } />);
+  });
 
-    const notFound = screen.getByText('No favorite pokemon found');
-    expect(notFound).toBeInTheDocument();
+  test('Teste se é exibida na tela a mensagem "No favorite pokemon found", caso a pessoa não tenha Pokémon favoritos', () => {
+    renderWithRouter(<FavoritePokemon pokemonList={ [] } />);
+    const textEl = screen.getByText(/no favorite pokémon found/i);
+    expect(textEl).toBeInTheDocument();
+  });
+
+  test('Teste se apenas são exibidos os Pokémon favoritados.', () => {
+    const pokemonFavorite = screen.getByText(/pikachu/i);
+    expect(pokemonFavorite).toBeInTheDocument();
   });
 });
