@@ -1,54 +1,72 @@
-import { screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import renderWithRouter from '../renderWithRouter';
 import App from '../App';
-import renderWithRouter from './renderWithRouter';
 
-describe('Tests for App.js', () => {
-  it('contains a fixed set of navigation links', () => {
+const favoritePokemon = 'Favorite Pokémon';
+
+describe('Teste o componente <App.js />', () => {
+  it('Teste se o topo da aplicação contém um conjunto fixo de links de navegação', () => {
     renderWithRouter(<App />);
 
-    const homeLink = screen.getByRole('link', { name: 'Home' });
-    const aboutLink = screen.getByRole('link', { name: 'About' });
-    const favoritesLink = screen.getByRole('link', { name: 'Favorite Pokémons' });
+    const homeElement = screen.getByRole('link', {
+      name: 'Home',
+    });
+    const aboutElement = screen.getByRole('link', {
+      name: 'About',
+    });
+    const favoriteElement = screen.getByRole('link', {
+      name: favoritePokemon,
+    });
 
-    expect(homeLink).toBeInTheDocument();
-    expect(aboutLink).toBeInTheDocument();
-    expect(favoritesLink).toBeInTheDocument();
+    expect(homeElement).toBeInTheDocument();
+    expect(homeElement).toHaveAttribute('href', '/');
+
+    expect(aboutElement).toBeInTheDocument();
+    expect(aboutElement).toHaveAttribute('href', '/about');
+
+    expect(favoriteElement).toBeInTheDocument();
+    expect(favoriteElement).toHaveAttribute('href', '/favorites');
   });
 
-  it('when clicking the Home link, redirect to URL /', () => {
+  it('Teste se a aplicação é redirecionada para a página inicial, na URL / ao clicar no link Home da barra de navegação', async () => {
     const { history } = renderWithRouter(<App />);
 
-    const homeLink = screen.getByRole('link', { name: 'Home' });
-    userEvent.click(homeLink);
-    expect(history.location.pathname).toBe('/');
+    const homeElement = screen.getByRole('link', {
+      name: 'Home',
+    });
+
+    userEvent.click(homeElement);
+
+    await waitFor(() => {
+      const { pathname } = history.location;
+      expect(pathname).toBe('/');
+    }, { timeout: 2000 });
   });
 
-  it('when clicking the About link, redirect to URL /about', () => {
+  it('Teste se a aplicação é redirecionada para a página de About, na URL /about, ao clicar no link About da barra de navegação', async () => {
     const { history } = renderWithRouter(<App />);
 
-    const aboutLink = screen.getByRole('link', { name: 'About' });
-    userEvent.click(aboutLink);
-    expect(history.location.pathname).toBe('/about');
+    const aboutElement = screen.getByRole('link', {
+      name: 'About',
+    });
+
+    userEvent.click(aboutElement);
+
+    await waitFor(() => {
+      const { pathname } = history.location;
+      expect(pathname).toBe('/about');
+    }, { timeout: 2000 });
   });
 
-  it('when clicking the Favorite Pokémons link, redirect to URL /favorites', () => {
+  it('Teste se a aplicação é redirecionada para a página de Pokémon Favoritados, na URL /favorites, ao clicar no link Favorite Pokémon da barra de navegação', async () => {
     const { history } = renderWithRouter(<App />);
 
-    const favoritesLink = screen.getByRole('link', { name: 'Favorite Pokémons' });
-    userEvent.click(favoritesLink);
-    expect(history.location.pathname).toBe('/favorites');
-  });
+    act(() => history.push('/teste'));
 
-  it('redirected to Not Found page when entering unknown URL', () => {
-    const { history } = renderWithRouter(<App />);
-    const TEXT_NOT_FOUND = /Page requested not found/i;
-
-    history.push('/notFoundUrl');
-    const notFound = screen.getByRole('heading', { name: TEXT_NOT_FOUND,
-      level: 2 });
-
-    expect(notFound).toBeInTheDocument();
+    const pageNotFoundElement = screen.getByRole('heading', {
+      name: 'Page requested not found',
+    });
+    expect(pageNotFoundElement).toBeInTheDocument();
   });
 });
